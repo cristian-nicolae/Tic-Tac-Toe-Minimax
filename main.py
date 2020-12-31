@@ -12,8 +12,9 @@ XO = 'x'
 clock = pygame.time.Clock()
 is_running = True
 line_color = "black"
-winner = None
-draw = None
+
+human = 'x'
+computer = 'o'
 
 screen = pygame.display.set_mode((width, height))
 background = pygame.Surface((width, height))
@@ -28,6 +29,7 @@ button1_1 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((200 * 0, 0),
 button1_2 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((200 * 1, 0), (200, 200)),
                                          text='',
                                          manager=manager)
+
 button1_3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((200 * 2, 0), (200, 200)),
                                          text='',
                                          manager=manager)
@@ -54,29 +56,92 @@ button3_3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((200 * 2, 400
 board = [[button1_1, button1_2, button1_3], [button2_1, button2_2, button2_3], [button3_1, button3_2, button3_3]]
 
 
+def ai_turn():
+    best_score = -999
+    best_move = []
+    print("caca2")
+    for n in range(0, 3):
+        for m in range(0, 3):
+            if board[n][m].text == '':
+                board[n][m].set_text('x')
+                print("caca3")
+                score = minimax(board, 0, False)
+                print("Score is: ", score)
+                board[n][m].set_text('')  # Undo the previous move
+                print("caca4")
+                if score > best_score:
+                    best_score = score
+                    best_move = [n, m]
+    board[best_move[0]][best_move[1]].set_text('x')
+
+
+scores = {'o': 1, 'x': -1, 'draw': 0}
+result = 'o'
+
+
+def minimax(table, depth, is_minimizing):
+    if check_win() == 'o':
+        score = -10
+        return score
+    if check_win() == 'x':
+        score = 10
+        return score
+    if check_win() == 'draw':
+        score = 0
+        return score
+    # if result is not None:
+    #     score = scores[result]
+    #     return score
+    if is_minimizing:
+        best_score = -999
+        for index_1 in range(0, 3):
+            for index_2 in range(0, 3):
+                if table[index_1][index_2].text == '':
+                    table[index_1][index_2].set_text('x')
+                    score = minimax(table, depth + 1, False)
+                    table[index_1][index_2].set_text('')
+                    best_score = max(score, best_score)
+        return best_score
+    else:
+        best_score = 999
+        for index_1 in range(0, 3):
+            for index_2 in range(0, 3):
+                if table[index_1][index_2].text == '':
+                    table[index_1][index_2].set_text('o')
+                    score = minimax(table, depth + 1, True)
+                    table[index_1][index_2].set_text('')
+                    best_score = min(score, best_score)
+        return best_score
+
+
 def random_computer():
     a = free_squares()
-    r = random.randrange(0, len(a))
-    board[a[r][0]][a[r][1]].set_text('o')
+    if len(a) > 0:
+        r = random.randrange(0, len(a))
+        board[a[r][0]][a[r][1]].set_text('o')
 
 
 def check_win():
-    global board, winner, draw
     for row in range(0, 3):
         if board[row][0].text == board[row][1].text == board[row][2].text and board[row][0].text != '':
-            print("Winner is " + board[row][0].text)
-            break
+            winner = board[row][0].text
+            return winner
     for col in range(0, 3):
         if board[0][col].text == board[1][col].text == board[2][col].text and board[0][col].text != '':
-            print("Winner is " + board[col][0].text)
-            break
+            winner = board[col][0].text
+            return winner
     if board[0][0].text == board[1][1].text == board[2][2].text and board[0][0].text != '':
-        print("Winner is " + board[0][0].text)
+        winner = board[0][0].text
+        return winner
     if board[0][2].text == board[1][1].text == board[2][0].text and board[0][2].text != '':
-        print("Winner is " + board[0][2].text)
+        winner = board[0][2].text
+        return winner
+    if len(free_squares()) == 0:
+        return 'draw'
 
 
 def free_squares():
+    global board
     free_spaces = []
     for a in range(0, 3):
         for b in range(0, 3):
@@ -108,21 +173,34 @@ def drawline():
     pygame.draw.line(screen, line_color, (0, height / 3 * 2), (width, height / 3 * 2), 7)
 
 
+def reset():
+    for location in range(0, 3):
+        for place in board[location]:
+            place.set_text('')
+
+
+print(scores[result])
+print(scores['x'])
+print(scores['draw'])
+
 while is_running:
     screen.blit(background, (0, 0))
-    time_delta = clock.tick(10) / 1000.0
+    time_delta = clock.tick(5) / 1000.0
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             is_running = False
         if event.type == pygame.USEREVENT:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 for i in range(0, 3):
                     for button in board[i]:
+
                         if event.ui_element == button and button.text == '':
-                            button.set_text("x")
-                            random_computer()
-                            check_win()
-                            print(free_squares())
+
+                            button.set_text("o")
+                            ai_turn()
+                            print("caca")
+
 
         manager.process_events(event)
     manager.update(time_delta)
