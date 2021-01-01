@@ -59,39 +59,24 @@ board = [[button1_1, button1_2, button1_3], [button2_1, button2_2, button2_3], [
 def ai_turn():
     best_score = -999
     best_move = []
-    print("caca2")
     for n in range(0, 3):
         for m in range(0, 3):
             if board[n][m].text == '':
                 board[n][m].set_text('x')
-                print("caca3")
                 score = minimax(board, 0, False)
                 print("Score is: ", score)
                 board[n][m].set_text('')  # Undo the previous move
-                print("caca4")
                 if score > best_score:
                     best_score = score
-                    best_move = [n, m]
-    board[best_move[0]][best_move[1]].set_text('x')
-
-
-scores = {'o': 1, 'x': -1, 'draw': 0}
-result = 'o'
+                    best_move = (n, m)
+    board[best_move[0]][best_move[1]].set_text('o')
 
 
 def minimax(table, depth, is_minimizing):
-    if check_win() == 'o':
-        score = -10
+    scores = {'o': -10 - depth, 'x': 10 - depth, 'draw': 0 - depth}
+    if check_win() is not None:
+        score = scores[check_win()]
         return score
-    if check_win() == 'x':
-        score = 10
-        return score
-    if check_win() == 'draw':
-        score = 0
-        return score
-    # if result is not None:
-    #     score = scores[result]
-    #     return score
     if is_minimizing:
         best_score = -999
         for index_1 in range(0, 3):
@@ -128,7 +113,7 @@ def check_win():
             return winner
     for col in range(0, 3):
         if board[0][col].text == board[1][col].text == board[2][col].text and board[0][col].text != '':
-            winner = board[col][0].text
+            winner = board[0][col].text
             return winner
     if board[0][0].text == board[1][1].text == board[2][2].text and board[0][0].text != '':
         winner = board[0][0].text
@@ -179,10 +164,6 @@ def reset():
             place.set_text('')
 
 
-print(scores[result])
-print(scores['x'])
-print(scores['draw'])
-
 while is_running:
     screen.blit(background, (0, 0))
     time_delta = clock.tick(5) / 1000.0
@@ -197,10 +178,10 @@ while is_running:
 
                         if event.ui_element == button and button.text == '':
 
-                            button.set_text("o")
+                            button.set_text("x")
                             ai_turn()
-                            print("caca")
-
+                            if check_win() is not None:
+                                print(check_win())
 
         manager.process_events(event)
     manager.update(time_delta)
