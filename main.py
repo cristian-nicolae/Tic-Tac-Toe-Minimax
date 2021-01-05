@@ -62,7 +62,7 @@ def ai_turn():
     for n in range(0, 3):
         for m in range(0, 3):
             if board[n][m].text == '':
-                board[n][m].set_text('x')
+                board[n][m].set_text('o')
                 score = minimax(board, 0, False)
                 print("Score is: ", score)
                 board[n][m].set_text('')  # Undo the previous move
@@ -73,7 +73,7 @@ def ai_turn():
 
 
 def minimax(table, depth, is_minimizing):
-    scores = {'o': -10 - depth, 'x': 10 - depth, 'draw': 0 - depth}
+    scores = {'x': -10 - depth, 'o': 10 - depth, 'draw': 0 - depth}
     if check_win() is not None:
         score = scores[check_win()]
         return score
@@ -82,7 +82,7 @@ def minimax(table, depth, is_minimizing):
         for index_1 in range(0, 3):
             for index_2 in range(0, 3):
                 if table[index_1][index_2].text == '':
-                    table[index_1][index_2].set_text('x')
+                    table[index_1][index_2].set_text('o')
                     score = minimax(table, depth + 1, False)
                     table[index_1][index_2].set_text('')
                     best_score = max(score, best_score)
@@ -92,7 +92,7 @@ def minimax(table, depth, is_minimizing):
         for index_1 in range(0, 3):
             for index_2 in range(0, 3):
                 if table[index_1][index_2].text == '':
-                    table[index_1][index_2].set_text('o')
+                    table[index_1][index_2].set_text('x')
                     score = minimax(table, depth + 1, True)
                     table[index_1][index_2].set_text('')
                     best_score = min(score, best_score)
